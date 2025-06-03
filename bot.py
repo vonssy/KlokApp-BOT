@@ -224,8 +224,12 @@ class KlokApp:
 
         payload = {
             "id":self.browser_ids[address],
-            "title":"","messages":[
-                {"role":"user","content":content}
+            "title":"",
+            "messages":[
+                {
+                    "role":"user",
+                    "content":content
+                }
             ],
             "sources":[],
             "model":"llama-3.3-70b-instruct",
@@ -280,7 +284,7 @@ class KlokApp:
         except (Exception, ClientResponseError) as e:
             return None
         
-    async def solve_cf_turnstile(self, email: str, proxy=None, retries=5):
+    async def solve_cf_turnstile(self, address: str, proxy=None, retries=5):
         for attempt in range(retries):
             connector = ProxyConnector.from_url(proxy) if proxy else None
             try:
@@ -293,6 +297,7 @@ class KlokApp:
                     async with session.get(url=url) as response:
                         response.raise_for_status()
                         result = await response.text()
+                        self.log(result)
 
                         if 'OK|' not in result:
                             await asyncio.sleep(5)
@@ -314,11 +319,11 @@ class KlokApp:
 
                                 if 'OK|' in res_result:
                                     captcha_token = res_result.split('|')[1]
-                                    self.turnstile_tokens[email] = captcha_token
+                                    self.turnstile_tokens[address] = captcha_token
                                     return True
                                 elif res_result == "CAPCHA_NOT_READY":
                                     self.log(
-                                        f"{Fore.MAGENTA + Style.BRIGHT}    >{Style.RESET_ALL}"
+                                        f"{Fore.MAGENTA + Style.BRIGHT}   >{Style.RESET_ALL}"
                                         f"{Fore.BLUE + Style.BRIGHT} Message: {Style.RESET_ALL}"    
                                         f"{Fore.YELLOW + Style.BRIGHT}Captcha Not Ready, Retrying...{Style.RESET_ALL}"
                                     )
@@ -558,11 +563,11 @@ class KlokApp:
 
                         count = remaining
                         while remaining > 0:
-                            idx = count - remaining + 1
+                            idx = count - remaining
 
                             self.log(
                                 f"{Fore.MAGENTA + Style.BRIGHT}   >{Style.RESET_ALL}"
-                                f"{Fore.GREEN + Style.BRIGHT} {idx} {Style.RESET_ALL}"
+                                f"{Fore.GREEN + Style.BRIGHT} {idx+1} {Style.RESET_ALL}"
                                 f"{Fore.MAGENTA + Style.BRIGHT}Of{Style.RESET_ALL}"
                                 f"{Fore.GREEN + Style.BRIGHT} {count} {Style.RESET_ALL}"
                             )
@@ -590,22 +595,22 @@ class KlokApp:
                                 )
 
                                 answer = await self.perform_chat(address, content, proxy)
-                                if not answer:
+                                if answer:
+                                    self.log(
+                                        f"{Fore.MAGENTA + Style.BRIGHT}   >{Style.RESET_ALL}"
+                                        f"{Fore.BLUE + Style.BRIGHT} AI Answer: {Style.RESET_ALL}"
+                                        f"{Fore.WHITE + Style.BRIGHT}{answer}{Style.RESET_ALL}"
+                                    )
+
+                                    remaining += 1
+                                    used_contents.add(content)
+
+                                else:
                                     self.log(
                                         f"{Fore.MAGENTA + Style.BRIGHT}   >{Style.RESET_ALL}"
                                         f"{Fore.BLUE + Style.BRIGHT} AI Answer: {Style.RESET_ALL}"
                                         f"{Fore.RED + Style.BRIGHT}Models Not Responded{Style.RESET_ALL}"
                                     )
-                                    continue
-
-                                self.log(
-                                    f"{Fore.MAGENTA + Style.BRIGHT}   >{Style.RESET_ALL}"
-                                    f"{Fore.BLUE + Style.BRIGHT} AI Answer: {Style.RESET_ALL}"
-                                    f"{Fore.WHITE + Style.BRIGHT}{answer}{Style.RESET_ALL}"
-                                )
-
-                                remaining += 1
-                                used_contents.add(content)
 
                             else:
                                 self.log(
