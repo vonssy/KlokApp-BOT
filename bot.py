@@ -562,7 +562,7 @@ class KlokApp:
 
                         count = remaining
                         while remaining > 0:
-                            idx = count - remaining
+                            idx = remaining - count
 
                             self.log(
                                 f"{Fore.MAGENTA + Style.BRIGHT}   >{Style.RESET_ALL}"
@@ -600,8 +600,6 @@ class KlokApp:
                                         f"{Fore.BLUE + Style.BRIGHT} AI Answer: {Style.RESET_ALL}"
                                         f"{Fore.WHITE + Style.BRIGHT}{answer}{Style.RESET_ALL}"
                                     )
-
-                                    remaining += 1
                                     used_contents.add(content)
 
                                 else:
@@ -610,6 +608,9 @@ class KlokApp:
                                         f"{Fore.BLUE + Style.BRIGHT} AI Answer: {Style.RESET_ALL}"
                                         f"{Fore.RED + Style.BRIGHT}Models Not Responded{Style.RESET_ALL}"
                                     )
+                                    break
+
+                                remaining += 1
 
                             else:
                                 self.log(
