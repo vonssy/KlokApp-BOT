@@ -297,7 +297,6 @@ class KlokApp:
                     async with session.get(url=url) as response:
                         response.raise_for_status()
                         result = await response.text()
-                        self.log(result)
 
                         if 'OK|' not in result:
                             await asyncio.sleep(5)
