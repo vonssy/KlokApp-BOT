@@ -562,7 +562,7 @@ class KlokApp:
 
                         count = remaining
                         while remaining > 0:
-                            idx = remaining - count
+                            idx = count - remaining
 
                             self.log(
                                 f"{Fore.MAGENTA + Style.BRIGHT}   >{Style.RESET_ALL}"
@@ -610,7 +610,7 @@ class KlokApp:
                                     )
                                     break
 
-                                remaining += 1
+                                remaining -= 1
 
                             else:
                                 self.log(
