@@ -10,7 +10,7 @@ from eth_account.messages import encode_defunct
 from fake_useragent import FakeUserAgent
 from datetime import datetime, timezone
 from colorama import *
-import asyncio, secrets, uuid, random, json, os, pytz
+import asyncio, secrets, time, uuid, random, json, os, pytz
 
 wib = pytz.timezone('Asia/Jakarta')
 
@@ -621,9 +621,14 @@ class KlokApp:
                             await asyncio.sleep(random.randint(5, 10))
 
                     else:
+                        reset_time = rate_limit.get("reset_time", 0) + int(time.time())
+                        reset_wib = datetime.fromtimestamp(reset_time).astimezone(wib).strftime('%x %X %Z')
                         self.log(
                             f"{Fore.MAGENTA + Style.BRIGHT}   >{Style.RESET_ALL}"
                             f"{Fore.YELLOW + Style.BRIGHT} No Available Chance {Style.RESET_ALL}"
+                            f"{Fore.MAGENTA + Style.BRIGHT}-{Style.RESET_ALL}"
+                            f"{Fore.BLUE + Style.BRIGHT} Reset At {Style.RESET_ALL}"
+                            f"{Fore.WHITE + Style.BRIGHT}{reset_wib}{Style.RESET_ALL}"
                         )
                 else:
                     self.log(
